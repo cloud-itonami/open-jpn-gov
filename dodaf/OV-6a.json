@@ -1,0 +1,45 @@
+{
+  "viewId": "open-jpn-gov.OV-6a",
+  "viewType": "OV-6a",
+  "title": "Operational Rules Model",
+  "did": "did:web:open-jpn-gov.etzhayyim.com",
+  "format": "json",
+  "content": {
+    "businessRules": [
+      {
+        "id": "rule.rosterSSoT",
+        "statement": "Ministry roster is the TypeScript file worker/src/roster.ts. No DB; changes require a PR.",
+        "kind": "invariant"
+      },
+      {
+        "id": "rule.didPattern",
+        "statement": "Every entity DID MUST match did:web:open-jpn-gov.etzhayyim.com:{category}:{code} where category ∈ {cabinet, ministry, agency, independent}.",
+        "kind": "constraint",
+        "enforcedBy": "worker/src/roster.ts:didFor()"
+      },
+      {
+        "id": "rule.lawTypeClassification",
+        "statement": "Law-type selection from free-text query uses the DMN decision table openJpnGov.lawTypeClassification. Hit policy FIRST. Default → all.",
+        "kind": "decisionTable",
+        "dmnDecisionKey": "openJpnGov.lawTypeClassification",
+        "source": "dmn/law-type-classification.dmn"
+      },
+      {
+        "id": "rule.edgeCache",
+        "statement": "All e-Gov upstream responses are cached 1h at the CF edge. Upstream outage surfaces as UpstreamError 502 — roster endpoints remain available.",
+        "kind": "invariant"
+      },
+      {
+        "id": "rule.disclaimer",
+        "statement": "All profile/AV-1 content includes the disclaimer 'AI Agent — unofficial, not affiliated with the Japanese government.'",
+        "kind": "invariant",
+        "enforcedBy": "kotodama.jsonld profile.description"
+      }
+    ]
+  },
+  "refs": {
+    "dmnDecisionKeys": ["openJpnGov.lawTypeClassification"],
+    "viewIds": ["open-jpn-gov.OV-5b"]
+  },
+  "version": 1
+}

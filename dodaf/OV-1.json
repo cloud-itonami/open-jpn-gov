@@ -1,0 +1,26 @@
+{
+  "viewId": "open-jpn-gov.OV-1",
+  "viewType": "OV-1",
+  "title": "High-Level Operational Concept Graphic",
+  "did": "did:web:open-jpn-gov.etzhayyim.com",
+  "format": "json",
+  "content": {
+    "operationalNodes": [
+      { "id": "client",  "label": "Client (citizen/journalist/agent)" },
+      { "id": "etzhayyim",    "label": "open-jpn-gov.etzhayyim.com (Worker)" },
+      { "id": "roster",  "label": "Embedded roster (TS)" },
+      { "id": "elaws",   "label": "e-Gov 法令API v2" },
+      { "id": "cfcache", "label": "CF edge cache (1h)" }
+    ],
+    "operationalFlows": [
+      { "from": "client",  "to": "etzhayyim",    "label": "XRPC listMinistries/getMinistry/listAgencies" },
+      { "from": "etzhayyim",    "to": "roster",  "label": "in-process lookup (O(n))" },
+      { "from": "client",  "to": "etzhayyim",    "label": "XRPC searchLaws/getLaw" },
+      { "from": "etzhayyim",    "to": "cfcache", "label": "read-through cache" },
+      { "from": "cfcache", "to": "elaws",   "label": "cache miss → upstream fetch" }
+    ],
+    "narrative": "Public read-only directory + law proxy. No auth, no DB. Roster ships as typed data in the Worker bundle; laws are fetched live with 1h cache so amendments propagate within an hour."
+  },
+  "refs": { "viewIds": ["open-jpn-gov.SV-1", "open-jpn-gov.OV-5b"] },
+  "version": 1
+}

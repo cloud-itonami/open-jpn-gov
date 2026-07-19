@@ -1,0 +1,36 @@
+{
+  "$schema": "https://etzhayyim.com/schemas/camunda-form/v1",
+  "formKey": "openJpnGov.searchLaw.v1",
+  "name": "Search Law",
+  "version": 1,
+  "lexiconRef": "com.etzhayyim.apps.openJpnGov.searchLaws",
+  "components": [
+    {
+      "key": "query",
+      "label": "検索クエリ (法令名/本文)",
+      "type": "textfield"
+    },
+    {
+      "key": "userHint",
+      "label": "法令種別 (任意)",
+      "type": "select",
+      "values": [
+        { "label": "すべて", "value": "all" },
+        { "label": "憲法", "value": "constitution" },
+        { "label": "法律", "value": "law" },
+        { "label": "政令", "value": "cabinetOrder" },
+        { "label": "省令・府令", "value": "ministerialOrdinance" },
+        { "label": "規則", "value": "rule" }
+      ],
+      "defaultValue": "all"
+    },
+    { "key": "limit",  "label": "件数", "type": "number", "defaultValue": 20, "validate": { "min": 1, "max": 100 } },
+    { "key": "offset", "label": "オフセット", "type": "number", "defaultValue": 0, "validate": { "min": 0 } }
+  ],
+  "variableMappings": {
+    "query": "query",
+    "userHint": "userHint",
+    "limit": "limit",
+    "offset": "offset"
+  }
+}

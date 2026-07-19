@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL"
+                  xmlns:camunda="http://camunda.org/schema/1.0/bpmn"
+                  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                  id="open-jpn-gov-search-law"
+                  targetNamespace="https://etzhayyim.com/bpmn/open-jpn-gov">
+  <bpmn:process id="searchLaw" name="Search Law (e-Gov)" isExecutable="true">
+    <bpmn:startEvent id="Start_Query" name="Search query received"/>
+    <bpmn:sequenceFlow id="f1" sourceRef="Start_Query" targetRef="Task_Form"/>
+
+    <bpmn:userTask id="Task_Form" name="Collect search criteria"
+                   camunda:formKey="openJpnGov.searchLaw.v1"/>
+    <bpmn:sequenceFlow id="f2" sourceRef="Task_Form" targetRef="Task_ClassifyType"/>
+
+    <bpmn:businessRuleTask id="Task_ClassifyType" name="Classify law type (DMN)"
+                           camunda:decisionRef="openJpnGov.lawTypeClassification"/>
+    <bpmn:sequenceFlow id="f3" sourceRef="Task_ClassifyType" targetRef="Task_FetchElaws"/>
+
+    <bpmn:serviceTask id="Task_FetchElaws" name="e-Gov 法令API lawlists"
+                      camunda:topic="com.etzhayyim.apps.openJpnGov.searchLaws"/>
+    <bpmn:sequenceFlow id="f4" sourceRef="Task_FetchElaws" targetRef="Task_Filter"/>
+
+    <bpmn:scriptTask id="Task_Filter" name="Client-side filter by query"
+                     scriptFormat="javascript">
+      <bpmn:script>laws.filter(l =&gt; l.lawName.includes(query))</bpmn:script>
+    </bpmn:scriptTask>
+    <bpmn:sequenceFlow id="f5" sourceRef="Task_Filter" targetRef="End_Results"/>
+
+    <bpmn:endEvent id="End_Results" name="Results returned"/>
+  </bpmn:process>
+</bpmn:definitions>

@@ -1,0 +1,46 @@
+{
+  "viewId": "open-jpn-gov.SV-1",
+  "viewType": "SV-1",
+  "title": "Systems Interface Description",
+  "did": "did:web:open-jpn-gov.etzhayyim.com",
+  "format": "json",
+  "content": {
+    "systems": [
+      {
+        "id": "sys.worker",
+        "name": "open-jpn-gov Worker",
+        "platform": "Cloudflare Workers",
+        "entrypoint": "worker/src/app.ts",
+        "interfaces": [
+          { "id": "if.xrpc.listMinistries", "kind": "XRPC", "method": "GET", "nsid": "com.etzhayyim.apps.openJpnGov.listMinistries" },
+          { "id": "if.xrpc.getMinistry",    "kind": "XRPC", "method": "GET", "nsid": "com.etzhayyim.apps.openJpnGov.getMinistry" },
+          { "id": "if.xrpc.listAgencies",   "kind": "XRPC", "method": "GET", "nsid": "com.etzhayyim.apps.openJpnGov.listAgencies" },
+          { "id": "if.xrpc.searchLaws",     "kind": "XRPC", "method": "GET", "nsid": "com.etzhayyim.apps.openJpnGov.searchLaws" },
+          { "id": "if.xrpc.getLaw",         "kind": "XRPC", "method": "GET", "nsid": "com.etzhayyim.apps.openJpnGov.getLaw" }
+        ]
+      },
+      {
+        "id": "sys.elaws",
+        "name": "e-Gov 法令API v2",
+        "platform": "External (laws.e-gov.go.jp)",
+        "operator": "Digital Agency",
+        "interfaces": [
+          { "id": "if.elaws.lawlists", "kind": "HTTP", "method": "GET /api/2/lawlists/{type}" },
+          { "id": "if.elaws.lawdata",  "kind": "HTTP", "method": "GET /api/2/lawdata/{lawNumOrId}" }
+        ]
+      },
+      {
+        "id": "sys.cfcache",
+        "name": "CF edge cache",
+        "platform": "Cloudflare",
+        "ttlSeconds": 3600
+      }
+    ],
+    "connections": [
+      { "from": "sys.worker",  "to": "sys.cfcache", "protocol": "fetch() cf.cacheTtl" },
+      { "from": "sys.cfcache", "to": "sys.elaws",   "protocol": "HTTPS" }
+    ]
+  },
+  "refs": { "viewIds": ["open-jpn-gov.OV-1", "open-jpn-gov.CV-2"] },
+  "version": 1
+}

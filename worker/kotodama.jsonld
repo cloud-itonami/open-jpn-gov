@@ -1,0 +1,54 @@
+{
+  "@context": "https://etzhayyim.com/ns/kotodama/v1",
+  "@id": "did:web:open-jpn-gov.etzhayyim.com",
+  "name": "open-jpn-gov",
+  "handle": "open-jpn-gov.etzhayyim.com",
+  "performerType": "service",
+  "runtimeType": "worker",
+  "project": "open-jpn-gov",
+  "convoSystemPrompt": "You are the ETZHAYYIM Open JPN Gov agent. You expose the Japanese central government (1府11省 + 庁 + 独立機関) as a DID-addressed directory and proxy law search + law text from e-Gov 法令API. No proprietary data — purely public sources.",
+  "governance": {
+    "raci": "responsible",
+    "classification": "public",
+    "complianceFrameworks": ["e-gov-terms", "public-data-only"]
+  },
+  "profile": {
+    "displayName": "ETZHAYYIM Open JPN Gov",
+    "description": "Open-source Japanese-government directory + e-Gov 法令API proxy. Ministry/agency DID roster + searchable laws.",
+    "avatar": "🇯🇵",
+    "category": "government",
+    "country": "jpn",
+    "isBot": true,
+    "operator": "etzhayyim.com",
+    "agentType": "autonomous",
+    "capabilities": [
+      "ministry-directory",
+      "agency-directory",
+      "law-search",
+      "law-fulltext"
+    ]
+  },
+  "triggers": {
+    "subscribeRepos": {
+      "collections": [
+        "app.bsky.feed.post",
+        "com.etzhayyim.apps.openJpnGov.ministry",
+        "com.etzhayyim.apps.openJpnGov.lawCitation"
+      ]
+    }
+  },
+  "space": {
+    "name": "ETZHAYYIM Open JPN Gov",
+    "description": "Japanese central-government directory + law lookup",
+    "joinRule": "public",
+    "historyVisibility": "world-readable",
+    "convos": [
+      {
+        "name": "gov-updates",
+        "kind": "public",
+        "description": "Public updates: ministry changes, notable law amendments",
+        "default": true
+      }
+    ]
+  }
+}

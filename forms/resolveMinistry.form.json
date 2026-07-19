@@ -1,0 +1,23 @@
+{
+  "$schema": "https://etzhayyim.com/schemas/camunda-form/v1",
+  "formKey": "openJpnGov.resolveMinistry.v1",
+  "name": "Resolve Ministry",
+  "version": 1,
+  "lexiconRef": "com.etzhayyim.apps.openJpnGov.getMinistry",
+  "components": [
+    {
+      "key": "inputKind",
+      "label": "入力種別",
+      "type": "radio",
+      "validate": { "required": true },
+      "values": [
+        { "label": "コード (例: mof)", "value": "code" },
+        { "label": "DID",              "value": "did" }
+      ],
+      "defaultValue": "code"
+    },
+    { "key": "code", "label": "省庁コード", "type": "textfield", "conditional": { "equals": { "inputKind": "code" } } },
+    { "key": "did",  "label": "DID",       "type": "textfield", "conditional": { "equals": { "inputKind": "did"  } }, "validate": { "pattern": "^did:web:open-jpn-gov\\.etzhayyim\\.ai:.+" } }
+  ],
+  "variableMappings": { "inputKind": "inputKind", "code": "code", "did": "did" }
+}

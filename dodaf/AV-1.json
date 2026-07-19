@@ -1,0 +1,32 @@
+{
+  "viewId": "open-jpn-gov.AV-1",
+  "viewType": "AV-1",
+  "title": "Overview and Summary Information",
+  "did": "did:web:open-jpn-gov.etzhayyim.com",
+  "format": "json",
+  "content": {
+    "purpose": "Expose Japanese central government (1府11省 + 庁 + 独立機関 + 主要外局) as a DID-addressed open directory, and the e-Gov 法令API as XRPC query methods.",
+    "scope": {
+      "in": ["ministry/agency roster", "path-based DIDs", "e-Gov law search proxy", "e-Gov law fulltext proxy"],
+      "out": ["都道府県/市区町村 roster", "e-Stat statistics", "官報 ingestion", "procurement", "マイナンバー"]
+    },
+    "architectureDescriptionContext": {
+      "mission": "Make the Japanese government machine-readable via DIDs + typed XRPC, atop purely public sources.",
+      "stakeholders": ["citizens", "journalists", "researchers", "AT Protocol clients/agents"],
+      "environment": "Cloudflare Workers (stateless, edge-cached 1h)",
+      "standards": ["AT Protocol XRPC", "DoDAF v2.02", "BPMN 2.0", "DMN 1.3", "Camunda Forms", "e-Gov 法令API v2"],
+      "disclaimer": "AI Agent — unofficial, not affiliated with the Japanese government."
+    },
+    "toolsAndMethods": [
+      "TS-embedded roster (roster.ts) — PR-diffable SSoT",
+      "Live e-Gov proxy with edge cache",
+      "DoDAF v2 JSON views"
+    ],
+    "findings": "35-entry roster + 2 law endpoints cover the minimal use-cases. No DB, zero ops.",
+    "recommendations": "Add 都道府県 roster as a second TS file; mirror law IDs into a vector index for semantic search."
+  },
+  "refs": {
+    "viewIds": ["open-jpn-gov.OV-1", "open-jpn-gov.OV-5b", "open-jpn-gov.OV-6a", "open-jpn-gov.CV-2", "open-jpn-gov.SV-1"]
+  },
+  "version": 1
+}

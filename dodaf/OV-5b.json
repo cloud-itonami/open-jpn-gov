@@ -1,0 +1,54 @@
+{
+  "viewId": "open-jpn-gov.OV-5b",
+  "viewType": "OV-5b",
+  "title": "Operational Activity Model",
+  "did": "did:web:open-jpn-gov.etzhayyim.com",
+  "format": "json",
+  "content": {
+    "activities": [
+      {
+        "id": "act.searchLaw",
+        "name": "Search Law",
+        "type": "bpmn",
+        "bpmnProcessKey": "searchLaw",
+        "source": "bpmn/search-law.bpmn",
+        "realisedBy": [
+          { "xrpc": "com.etzhayyim.apps.openJpnGov.searchLaws" },
+          { "form": "openJpnGov.searchLaw.v1" },
+          { "dmn":  "openJpnGov.lawTypeClassification" }
+        ]
+      },
+      {
+        "id": "act.resolveMinistry",
+        "name": "Resolve Ministry DID",
+        "type": "bpmn",
+        "bpmnProcessKey": "resolveMinistry",
+        "source": "bpmn/resolve-ministry.bpmn",
+        "realisedBy": [
+          { "xrpc": "com.etzhayyim.apps.openJpnGov.getMinistry" },
+          { "xrpc": "com.etzhayyim.apps.openJpnGov.listAgencies" },
+          { "form": "openJpnGov.resolveMinistry.v1" }
+        ]
+      },
+      {
+        "id": "act.listRoster",
+        "name": "List Roster",
+        "type": "xrpc",
+        "realisedBy": [{ "xrpc": "com.etzhayyim.apps.openJpnGov.listMinistries" }]
+      },
+      {
+        "id": "act.getLawFullText",
+        "name": "Get Law Fulltext",
+        "type": "xrpc",
+        "realisedBy": [{ "xrpc": "com.etzhayyim.apps.openJpnGov.getLaw" }]
+      }
+    ]
+  },
+  "refs": {
+    "bpmnProcessKeys": ["searchLaw", "resolveMinistry"],
+    "dmnDecisionKeys": ["openJpnGov.lawTypeClassification"],
+    "formKeys": ["openJpnGov.searchLaw.v1", "openJpnGov.resolveMinistry.v1"],
+    "viewIds": ["open-jpn-gov.OV-6a", "open-jpn-gov.SV-1"]
+  },
+  "version": 1
+}

@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions xmlns="https://www.omg.org/spec/DMN/20191111/MODEL/"
+             xmlns:camunda="http://camunda.org/schema/1.0/dmn"
+             id="open-jpn-gov-law-type-classification"
+             name="Law Type Classification"
+             namespace="https://etzhayyim.com/dmn/open-jpn-gov">
+  <decision id="openJpnGov.lawTypeClassification" name="Classify Law Type">
+    <decisionTable id="dt_lawTypeClassification" hitPolicy="FIRST">
+      <input id="i_query" label="query">
+        <inputExpression typeRef="string"><text>query</text></inputExpression>
+      </input>
+      <input id="i_userHint" label="userHint">
+        <inputExpression typeRef="string"><text>userHint</text></inputExpression>
+      </input>
+
+      <output id="o_lawType"    label="lawType"    name="lawType"    typeRef="string"/>
+      <output id="o_elawsParam" label="elawsParam" name="elawsParam" typeRef="string"/>
+
+      <rule id="r1">
+        <inputEntry><text>-</text></inputEntry>
+        <inputEntry><text>"constitution"</text></inputEntry>
+        <outputEntry><text>"constitution"</text></outputEntry>
+        <outputEntry><text>"1"</text></outputEntry>
+      </rule>
+      <rule id="r2">
+        <inputEntry><text>contains("憲法")</text></inputEntry>
+        <inputEntry><text>-</text></inputEntry>
+        <outputEntry><text>"constitution"</text></outputEntry>
+        <outputEntry><text>"1"</text></outputEntry>
+      </rule>
+      <rule id="r3">
+        <inputEntry><text>contains("政令")</text></inputEntry>
+        <inputEntry><text>-</text></inputEntry>
+        <outputEntry><text>"cabinetOrder"</text></outputEntry>
+        <outputEntry><text>"3"</text></outputEntry>
+      </rule>
+      <rule id="r4">
+        <inputEntry><text>contains("省令") or contains("府令")</text></inputEntry>
+        <inputEntry><text>-</text></inputEntry>
+        <outputEntry><text>"ministerialOrdinance"</text></outputEntry>
+        <outputEntry><text>"4"</text></outputEntry>
+      </rule>
+      <rule id="r5">
+        <inputEntry><text>contains("規則")</text></inputEntry>
+        <inputEntry><text>-</text></inputEntry>
+        <outputEntry><text>"rule"</text></outputEntry>
+        <outputEntry><text>"5"</text></outputEntry>
+      </rule>
+      <rule id="r6">
+        <inputEntry><text>contains("法")</text></inputEntry>
+        <inputEntry><text>-</text></inputEntry>
+        <outputEntry><text>"law"</text></outputEntry>
+        <outputEntry><text>"2"</text></outputEntry>
+      </rule>
+      <rule id="r7">
+        <inputEntry><text>-</text></inputEntry>
+        <inputEntry><text>-</text></inputEntry>
+        <outputEntry><text>"all"</text></outputEntry>
+        <outputEntry><text>"1,2,3,4,5"</text></outputEntry>
+      </rule>
+    </decisionTable>
+  </decision>
+</definitions>
