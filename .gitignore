@@ -1,0 +1,6 @@
+# Dependency and build output produced by docs/operator-quickstart.md.
+# Lockfiles are deliberately NOT listed — whether to commit them is a decision
+# for this repo, not a side effect of running the quickstart.
+
+node_modules/
+.svelte-kit/
