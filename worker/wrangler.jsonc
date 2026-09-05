@@ -1,7 +1,7 @@
 {
   "$schema": "node_modules/wrangler/config-schema.json",
   "name": "etzhayyim-open-jpn-gov",
-  "main": "svelte/.svelte-kit/cloudflare/_worker.js",
+  "main": "./src/app.ts",
   "compatibility_date": "2026-04-15",
   "compatibility_flags": [
     "nodejs_compat"
@@ -17,14 +17,14 @@
   "vars": {
     "APP_HANDLE": "open-jpn-gov.etzhayyim.com",
     "PRIMARY_DID": "did:web:open-jpn-gov.etzhayyim.com",
-    "APP_FRAMEWORK": "sveltekit-edge-bff",
+    "APP_FRAMEWORK": "shadow-cljs-edge-bff",
     "AGENTGATEWAY_MCP_ROUTER_URL": "https://mcp.etzhayyim.com/xrpc/com.etzhayyim.mcp.message"
   },
   "observability": {
     "enabled": true
   },
   "assets": {
-    "directory": "./svelte/.svelte-kit/cloudflare/client",
+    "directory": "../web/dist",
     "binding": "ASSETS",
     "html_handling": "auto-trailing-slash",
     "not_found_handling": "none"
