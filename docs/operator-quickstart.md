@@ -1,16 +1,22 @@
 # Operator quickstart
 
-Every command below was run against this tree on **2026-08-15** on macOS
+Most commands below were run against this tree on **2026-08-15** on macOS
 (darwin 25.3.0, Node 26.3.0, npm 11.16.0). Where a command fails in this
-workspace, the failure is reproduced verbatim rather than hidden. The one step
-that was *not* exercised is marked as such — see [Deploy](#deploy).
+workspace, the failure is reproduced verbatim rather than hidden. **§2 was
+rewritten on 2026-09-07** after `worker/svelte/` was removed and replaced with
+a ClojureScript (shadow-cljs + reagent) UI (PR #1); its build was verified by
+that PR ("Build completed. (95 files, 0 compiled, 0 warnings, 14.74s)") but not
+independently re-run for this rewrite, because doing so requires the exact
+worktree layout `deps.edn` assumes (see §2). The one step that was *not*
+exercised at all is marked as such — see [Deploy](#deploy).
 
 There are two independent build targets. Neither depends on the other.
 
-`node_modules/` and `.svelte-kit/` are gitignored, so following this document
-leaves the tree clean. Lockfiles are not ignored: `npm install` will leave a
-`package-lock.json` behind, and whether to commit it is a decision for this
-repo rather than a side effect of running these steps.
+`node_modules/`, `.shadow-cljs/` and `web/dist/js/` are gitignored, so
+following this document leaves the tree clean. Lockfiles are not ignored:
+`npm install` will leave a `package-lock.json` behind, and whether to commit
+it is a decision for this repo rather than a side effect of running these
+steps.
 
 ---
 
@@ -84,51 +90,65 @@ npm run typecheck --userconfig /tmp/npmrc-plain   # tsc --noEmit → exit 0
 
 ---
 
-## 2. `worker/svelte/` — the deployable entrypoint
+## 2. The UI build (shadow-cljs + reagent) — what `assets.directory` serves
 
-This is what `wrangler.jsonc` actually points at
-(`main: svelte/.svelte-kit/cloudflare/_worker.js`).
+Through 2026-09-05 this section described `worker/svelte/`, which
+`wrangler.jsonc` `main` pointed at. That directory is gone; the UI is now a
+ClojureScript (shadow-cljs + reagent, on `kotoba-ui`/`appkit`) build at the
+repo root (`deps.edn`, `shadow-cljs.edn`, `src/cloud_itonami/open_jpn_gov/`,
+`web/`), and `wrangler.jsonc` `main` now points at `./src/app.ts` directly
+(see §3) — `assets.directory` points at `web/dist`, which this build populates.
+
+### A layout caveat before you build
+
+`deps.edn`'s `:cljs` alias resolves `appkit` via a committed relative
+`:local/root` path (`../../../../kotoba-lang/appkit`), and its own comment
+says this depth is correct **only from the specific worktree the build was
+verified in** (an `orgs/cloud-itonami/_wt-open-jpn-gov`-style sibling
+worktree inside the superproject), not from an arbitrary checkout path or a
+`/tmp` worktree. If `npx shadow-cljs compile app` fails to resolve `appkit`,
+this is why — check the actual depth from your checkout to
+`orgs/kotoba-lang/appkit` before assuming the build itself is broken.
 
 ### Build
 
 Heavy builds in this workspace are serialised by the shared resource governor,
-so do not invoke `vite` / `npm run build` directly. `resource-guard.mjs` lives
-in the superproject, *outside* this repo — give it an absolute path rather than
-counting `../`:
+so do not invoke `shadow-cljs` / `npm run build` directly. `resource-guard.mjs`
+lives in the superproject, *outside* this repo — give it an absolute path
+rather than counting `../`:
 
 ```bash
 ROOT=~/github/com-junkawasaki          # your superproject checkout
-cd worker/svelte
-node "$ROOT/scripts/resource-guard.mjs" run build -- npm run build
+npm install
+node "$ROOT/scripts/resource-guard.mjs" run build -- npx shadow-cljs compile app
 ```
 
-The build takes 5–8s and emits:
-
-```
-.svelte-kit/cloudflare/_worker.js       (~4.3 kB)
-.svelte-kit/cloudflare/client/          (static assets)
-```
+Per PR #1 (merged 2026-09-05, from an `appkit`-resolving worktree): **Build
+completed. (95 files, 0 compiled, 0 warnings, 14.74s)**, emitting
+`web/dist/js/main.js`. That run is not independently re-verified by this
+rewrite of this document (see the note at the top of this file) — if you hit a
+different result, trust what you see over this transcript.
 
 ### What you just built
 
-Be clear about what this artifact is before shipping it. It contains the
-SvelteKit scaffold page and one route, `POST /xrpc/[...path]`, which forwards
-the request to `AGENTGATEWAY_MCP_ROUTER_URL` (default
-`https://mcp.etzhayyim.com/...`).
-
-It does **not** contain `worker/src/app.ts`. Verify for yourself:
-
-```bash
-grep -c 'ROSTER\|listMinistries\|laws\.e-gov' .svelte-kit/cloudflare/_worker.js   # → 0
-```
-
-So the 38-entry roster, the five `com.etzhayyim.apps.openJpnGov.*` methods, and
-the e-Gov proxy are **not served by a deploy of this repo as it stands**. Wiring
-them in is open work; see the README.
+A single static page (`web/dist/index.html` + `web/dist/js/main.js` +
+`web/dist/vendor/kotoba-ui.css`): an info card describing this project (name,
+kind, route count, whether XRPC is enabled, the public routes, the runtime
+bindings, and the source path), ported 1:1 from the content of the former
+`worker/svelte/src/routes/+page.svelte` scaffold page. It has no logic of its
+own and does not call `worker/src/app.ts` — it is a static description, not a
+live client of the roster/XRPC methods below.
 
 ---
 
-## 3. Upstream check
+## 3. `worker/src/app.ts` — the deployable entrypoint, and the upstream check
+
+This is what `wrangler.jsonc` `main` now points at directly (`./src/app.ts`).
+It serves the 38-entry roster, the five `com.etzhayyim.apps.openJpnGov.*`
+methods, the e-Gov proxy, and the DoDAF/form endpoints — see the README.
+`worker/src/xrpc-proxy.ts` (the former SvelteKit `/xrpc/<nsid>` →
+MCP-router forwarder) is **not** part of this file and is not wired in; see
+the README for why.
 
 `worker/src/app.ts` proxies e-Gov 法令API v2. No key needed:
 
@@ -147,11 +167,17 @@ endpoints cannot work regardless of anything in this repo.
 `wrangler deploy`:
 
 1. `open-jpn-gov.etzhayyim.com` — the route in `wrangler.jsonc` — **has no DNS
-   record.** Neither does `mcp.etzhayyim.com`, the default upstream for the only
-   live route in the build. (`etzhayyim.com` itself does resolve.)
-2. Per §2, deploying today publishes a scaffold page and a proxy to a
-   non-existent host — not the directory service this repo describes.
+   record** (re-verified 2026-09-07). Neither does `mcp.etzhayyim.com`, the
+   forwarding target `worker/src/xrpc-proxy.ts` used before it was preserved
+   unwired. (`etzhayyim.com` itself does resolve.)
+2. Deploying today would serve `worker/src/app.ts` (roster, XRPC methods,
+   e-Gov proxy — wired) behind the static UI in `web/dist` — this is real
+   progress over the previous scaffold-only state, but it has not been
+   exercised, so treat it as unverified rather than ready.
 
 `CLAUDE.md` documents `e7m actor deploy .` as the deploy path. That command was
-not run and its behaviour here is unverified. Treat the deploy story as open
-until the wiring gap is closed and the hostname exists.
+not run and its behaviour here is unverified. The wiring gap described in
+earlier versions of this document is closed (`main` now points at
+`worker/src/app.ts`); what remains open is that no route has a hostname and no
+deploy has been exercised. Treat the deploy story as open until the hostname
+exists and a deploy is actually run.
