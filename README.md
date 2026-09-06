@@ -11,46 +11,59 @@ Apache-2.0. Public data only.
 
 ## What is actually here, and what actually runs
 
-This repo is **not** a single deployed service. It is three parts at three very
-different stages, and they are not wired to each other. Read this table before
-you believe anything else in this repo — including `CLAUDE.md`, which describes
-an intended end state rather than the current one.
+This repo is **not** a single deployed service. It is several parts at
+different stages. Read this table before you believe anything else in this
+repo — including `CLAUDE.md`, which describes an intended end state rather
+than the current one.
 
-| Part | What it is | State (verified 2026-08-15) |
+| Part | What it is | State (verified 2026-09-07) |
 |---|---|---|
 | `kotoba/` | TypeScript library: gov-org registry over AT PDS records via `@etzhayyim/sdk` | **Working.** 10/10 tests pass, `tsc --noEmit` clean |
-| `worker/src/` | Single-file Worker: 38-entry roster + 5 XRPC methods + e-Gov proxy | **Written, not wired.** Nothing imports it; it is absent from the build output |
-| `worker/svelte/` | SvelteKit edge BFF — the actual `wrangler` entrypoint | **Builds, but is a scaffold placeholder** whose `/xrpc/*` forwards to an MCP router |
+| `worker/src/` | Single-file Worker: 38-entry roster + 5 XRPC methods + e-Gov proxy | **Wired.** `wrangler.jsonc` `main` points at `./src/app.ts` |
+| `src/`, `web/` | ClojureScript (shadow-cljs + reagent) UI, built to `web/dist` | **Builds.** Static info card, ported 1:1 from the former Svelte scaffold page |
+| `worker/src/xrpc-proxy.ts` | Former SvelteKit `/xrpc/<nsid>` → MCP-router forwarder | **Preserved, not wired.** See below |
 
-**Nothing is deployed.** `open-jpn-gov.etzhayyim.com` has no DNS record.
+**Nothing is deployed.** `open-jpn-gov.etzhayyim.com` has no DNS record
+(re-verified 2026-09-07).
 
-### The wiring gap
+### History: the Svelte → cljs migration
 
-`wrangler.jsonc` sets `main` to `svelte/.svelte-kit/cloudflare/_worker.js`. That
-build contains the SvelteKit app only. `worker/src/app.ts` — the roster, the five
-`com.etzhayyim.apps.openJpnGov.*` methods, the e-Gov proxy, the DoDAF and form
-endpoints — is imported by nothing, so **deploying this repo today would not
-serve any of it.** Confirmed by grepping the built `_worker.js` for `ROSTER`,
-`listMinistries` and `laws.e-gov`: zero hits.
+Through 2026-09-05 the deployable entrypoint was a SvelteKit edge BFF at
+`worker/svelte/`, and `wrangler.jsonc` `main` pointed at its build output
+(`svelte/.svelte-kit/cloudflare/_worker.js`). That build did not import
+`worker/src/app.ts` at all, so deploying served a scaffold page and a single
+`POST /xrpc/<nsid>` route that forwarded to `AGENTGATEWAY_MCP_ROUTER_URL`
+(default `https://mcp.etzhayyim.com/...` — itself never had a DNS record, so
+that path had no working upstream even when built).
 
-What the SvelteKit route *does* do is forward any `POST /xrpc/<nsid>` to
-`AGENTGATEWAY_MCP_ROUTER_URL`, defaulting to
-`https://mcp.etzhayyim.com/xrpc/com.etzhayyim.mcp.message`. **That host has no
-DNS record either**, so the proxy path has no working upstream as configured.
-
-Closing this gap — pointing `wrangler` at `worker/src/app.ts`, or importing it
-from a SvelteKit route — is the outstanding work in this repo. It is not done,
-and this README does not pretend otherwise.
+That gap is now closed the way this README used to say it could be:
+`worker/svelte/` was removed, `wrangler.jsonc` `main` was repointed at
+`./src/app.ts` directly, and `assets.directory` was repointed at `web/dist`
+(built by shadow-cljs from `src/cloud_itonami/open_jpn_gov/`). Static requests
+are served from `web/dist`; anything else reaches `worker/src/app.ts`, which
+serves the roster, the five `com.etzhayyim.apps.openJpnGov.*` methods, the
+e-Gov proxy, and the DoDAF/form endpoints directly. **`worker/src/app.ts`
+implements those five named methods only — it does not implement generic
+`POST /xrpc/<nsid>` forwarding to an external MCP router.** That behaviour
+existed only in the SvelteKit route and was not ported (its upstream had no
+DNS record regardless); the original file is preserved, unwired, at
+`worker/src/xrpc-proxy.ts` with a header explaining why it cannot run as-is
+and that reviving it is an undecided product question. **Wiring an MCP-router
+forwarder in is still open work if that behaviour is wanted going forward** —
+it is just no longer implicitly promised by a leftover route nobody was
+using.
 
 ## Layout
 
 ```
-kotoba/          TypeScript library (registry over AT PDS) — the working part
-worker/src/      Worker: roster, XRPC methods, e-Gov proxy — unwired
-worker/svelte/   SvelteKit edge BFF — the wrangler entrypoint
-bpmn/ dmn/       Process + decision models (resolve-ministry, search-law)
-dodaf/           DoDAF views (AV-1, OV-1, OV-5b, OV-6a, CV-2, SV-1)
-forms/           Form definitions served by worker/src/app.ts
+kotoba/                Working TypeScript library (registry over AT PDS)
+worker/src/            Worker: roster, XRPC methods, e-Gov proxy — wired (wrangler `main`)
+worker/src/xrpc-proxy.ts  Former SvelteKit MCP-router proxy — preserved, not wired
+src/cloud_itonami/open_jpn_gov/  ClojureScript UI (reagent), built via shadow-cljs
+web/                    UI build output (`web/dist`) — served as static assets
+bpmn/ dmn/              Process + decision models (resolve-ministry, search-law)
+dodaf/                  DoDAF views (AV-1, OV-1, OV-5b, OV-6a, CV-2, SV-1)
+forms/                  Form definitions served by worker/src/app.ts
 ```
 
 ## The roster

@@ -15,4 +15,4 @@
           :routes []
           :vars []
           :xrpc? true
-          :relative-path "60-apps/etzhayyim-project-open-jpn-gov/worker/svelte/src/routes/+page.svelte"}}))
+          :relative-path "src/cloud_itonami/open_jpn_gov/ui.cljs"}}))

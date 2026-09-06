@@ -3,4 +3,5 @@
 # for this repo, not a side effect of running the quickstart.
 
 node_modules/
-.svelte-kit/
+.shadow-cljs/
+web/dist/js/
