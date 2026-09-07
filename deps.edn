@@ -3,12 +3,13 @@
  ;; kotoba-ui → liquid-glass-ui → shitsuke — same convention as
  ;; orgs/kotoba-lang/murakumo-studio/deps.edn (local/root checkouts inside
  ;; the west superproject). Path is relative to this leaf repo checkout.
- ;; NOTE: in the _wt-* worktree (orgs/cloud-itonami/_wt-<repo>) the appkit
- ;; checkout is 4 levels up; in the shared checkout (orgs/cloud-itonami/<repo>)
- ;; it is 3. The 4-level form is committed because the worktree is where the
- ;; build is verified; adjust if resolving from a shared checkout.
+ ;; The path is relative to the west path of this repo
+ ;; (orgs/cloud-itonami/open-jpn-gov -> orgs/kotoba-lang/appkit = 2 levels up).
+ ;; A sibling worktree at orgs/cloud-itonami/_wt-<repo> resolves the same way.
+ ;; Do not commit a deeper form: west-orphan-audit reports it as a broken
+ ;; :local/root edge (2026-09-07, the 4-level form pointed outside the superproject).
  :aliases
  {:cljs
   {:extra-deps {thheller/shadow-cljs {:mvn/version "2.28.20"}
                 reagent/reagent {:mvn/version "1.2.0"}
-                io.github.kotoba-lang/appkit {:local/root "../../../../kotoba-lang/appkit"}}}}}
+                io.github.kotoba-lang/appkit {:local/root "../../kotoba-lang/appkit"}}}}}
