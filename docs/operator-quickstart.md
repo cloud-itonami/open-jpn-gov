@@ -106,7 +106,7 @@ repo root (`deps.edn`, `shadow-cljs.edn`, `src/cloud_itonami/open_jpn_gov/`,
 says this depth is correct **only from the specific worktree the build was
 verified in** (an `orgs/cloud-itonami/_wt-open-jpn-gov`-style sibling
 worktree inside the superproject), not from an arbitrary checkout path or a
-`/tmp` worktree. If `npx shadow-cljs compile app` fails to resolve `appkit`,
+`/tmp` worktree. If `amu compile --target wasm32-browser app` fails to resolve `appkit`,
 this is why — check the actual depth from your checkout to
 `orgs/kotoba-lang/appkit` before assuming the build itself is broken.
 
@@ -120,7 +120,7 @@ rather than counting `../`:
 ```bash
 ROOT=~/github/com-junkawasaki          # your superproject checkout
 npm install
-node "$ROOT/scripts/resource-guard.mjs" run build -- npx shadow-cljs compile app
+node "$ROOT/scripts/resource-guard.mjs" run build -- amu compile --target wasm32-browser app
 ```
 
 Per PR #1 (merged 2026-09-05, from an `appkit`-resolving worktree): **Build
