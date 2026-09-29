@@ -5,7 +5,7 @@
  * ministries / agencies / cabinet offices / bureaus / councils. Public OSS
  * directory data (no PII, no payment) → 3-axis clean. ADR-2605172000 kotoba.
  *
- * Identity hierarchy (per open-jpn-gov CLAUDE.md):
+ * Identity hierarchy (per open-jpn-gov AGENTS.md):
  *   did:web:open-jpn-gov.etzhayyim.com                       — controller
  *   did:web:open-jpn-gov.etzhayyim.com:ministry:mof          — 財務省
  *   did:web:open-jpn-gov.etzhayyim.com:agency:digital        — デジタル庁

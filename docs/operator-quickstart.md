@@ -175,7 +175,7 @@ endpoints cannot work regardless of anything in this repo.
    progress over the previous scaffold-only state, but it has not been
    exercised, so treat it as unverified rather than ready.
 
-`CLAUDE.md` documents `e7m actor deploy .` as the deploy path. That command was
+`AGENTS.md` documents `e7m actor deploy .` as the deploy path. That command was
 not run and its behaviour here is unverified. The wiring gap described in
 earlier versions of this document is closed (`main` now points at
 `worker/src/app.ts`); what remains open is that no route has a hostname and no
