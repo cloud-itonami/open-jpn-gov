@@ -13,7 +13,7 @@ Apache-2.0. Public data only.
 
 This repo is **not** a single deployed service. It is several parts at
 different stages. Read this table before you believe anything else in this
-repo — including `CLAUDE.md`, which describes an intended end state rather
+repo — including `AGENTS.md`, which describes an intended end state rather
 than the current one.
 
 | Part | What it is | State (verified 2026-09-07) |
